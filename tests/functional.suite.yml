@@ -1,0 +1,21 @@
+# Codeception Test Suite Configuration
+
+# suite for functional (integration) tests.
+# emulate web requests and make application process them.
+# Include one of framework modules (Symfony2, Yii2, Laravel4) to use it.
+
+class_name: FunctionalTester
+modules:
+    enabled: [Filesystem, FunctionalHelper, Db, Phalcon1]
+    config:
+        Phalcon1:
+            bootstrap: 'public/index.php'
+            cleanup: true
+            savepoints: false
+        Db:
+            dsn: 'mysql:host=localhost;dbname=network'
+            user: 'root'
+            password: ''
+            dump: 'tests/_data/dump.sql'
+            cleanup: true
+            populate: true

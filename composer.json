@@ -1,0 +1,14 @@
+{
+	"require": {
+		"monolog/monolog": "1.11.*",
+		"robmorgan/phinx": "0.3.8"
+	},
+	"require-dev": {
+		"codeception/codeception": "2.0.8"
+	},
+	"autoload": {
+		"psr-4": {
+			"Network\\": "app/Network"
+		}
+	}
+}
