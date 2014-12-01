@@ -19,6 +19,6 @@ $I->fillField('passwordConfirmation', 'secret');
 $I->click('Sign Up!');
 
 // expectations
+$I->seeRecord('Network\Users\User', ['username' => 'johndoe']);
 $I->seeCurrentUrlEquals('/@johndoe');
-$I->seeInDatabase('users', ['username' => 'johndoe']);
 $I->see('Your account has been created. Welcome!');
