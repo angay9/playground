@@ -1,11 +1,12 @@
 <?php
 
 use Network\Users\User as User;
+use Network\Users\Commanding\RegisterUserCommand;
 use Network\Forms\RegistrationForm as RegistrationForm;
 use Network\Validators\Validator as Validator;
+use Network\Commanding\CommandBus as CommandBus;
 
-class SessionController extends ControllerBase
-{
+class SessionController extends ControllerBase {
 
 	/**
 	 * Registration Form
@@ -13,9 +14,13 @@ class SessionController extends ControllerBase
 	 */
 	private $_form;
 	
-
+	/**
+	 * initialize
+	 * @return  void
+	 */
 	public function initialize ()
 	{
+		parent::initialize();
 		$this->_form = new RegistrationForm();
 	}
 
@@ -34,31 +39,24 @@ class SessionController extends ControllerBase
 	 */
 	public function storeAction ()
 	{		
-
 		$input = $this->request->getPost();
-		$input['createdAt'] = date('Y-m-d H:i:s');
-		$input['updatedAt'] = date('Y-m-d H:i:s');
-
-		$this->_form->setValidationRules([
-			'name' => 'required',
-			'username' => 'required',
-			'email' => 'required|email|unique:users,email',
-			'password' => 'required|confirmed:passwordConfirmation',
-		]);
 		
 		if ($this->_form->isValid($input)) {
 			// Passed
-																															
-			$user = new User();
-			$user->assign($input);
-			$res = $user->save();
-			$this->flash->success('Your account has been created. Welcome!');
-				
-			return $this->response->redirect(['for' => 'user_profile', 'username' => $user->getUsername()]);
+			$this->commandBus->execute(new RegisterUserCommand($input['name'], $input['username'], $input['email'], $input['password']));
+
+			$this->flash->success('Your account has been created. Welcome. Please sign in. ');
+							
+			return $this->response->redirect('');
 		}
 		
-		return $this->response->redirect(['for' => 'register_route']);						
-		
+		return $this->response->redirect(['for' => 'register_route']);								
+	}
+
+	public function destroyAction ()
+	{
+		$this->auth->deleteIdentity();		
+		return $this->response->redirect('');
 	}
 
 }

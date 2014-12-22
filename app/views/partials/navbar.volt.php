@@ -14,20 +14,36 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="collapse navbar-collapse navbar-ex1-collapse">
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Link</a></li>
-				<li><a href="#">Link</a></li>
+				
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href="#">Link</a></li>
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li><a href="#">Action</a></li>
-						<li><a href="#">Another action</a></li>
-						<li><a href="#">Something else here</a></li>
-						<li><a href="#">Separated link</a></li>
-					</ul>
-				</li>
+				<?php if ($this->auth->check()) { ?>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<?php echo $currentUser->getUsername(); ?>
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="<?php echo $this->url->get(array('for' => 'profile_route', 'username' => $currentUser->getUsername())); ?>">
+									<i class="fa fa-user"></i>
+									Profile
+								</a>
+							</li>
+							<li class="divider"></li>
+							<li>
+								<a href="<?php echo $this->url->get(array('for' => 'logout_route')); ?>">
+									<i class="fa fa-power-off"></i>
+									Logout
+								</a>
+							</li>
+						</ul>
+					</li>
+				<?php } else { ?>
+					<li>
+						<?php echo $this->tag->linkTo(array(array('for' => 'login_route'), 'Login')); ?>
+					</li>
+				<?php } ?>
 			</ul>
 		</div><!-- /.navbar-collapse -->
 	</div>

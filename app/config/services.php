@@ -1,7 +1,7 @@
 <?php
 
 use Phalcon\DI\FactoryDefault;
-use Phalcon\Mvc\View;
+use Phalcon\Mvc\View as View;
 use Phalcon\Mvc\Url as UrlResolver;
 use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
@@ -9,8 +9,16 @@ use Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
 use Phalcon\Mvc\Router as Router;
 use Phalcon\Flash\Session as Flash;
-use Network\Core\Routes as Routes;
 use Phalcon\Mvc\Dispatcher as Dispatcher;
+use Phalcon\Mvc\Model\Manager as ModelManager;
+
+use Network\Events\EventsManager as EventsManager;
+use Network\Core\Routes as Routes;
+use Network\Security\Auth as Auth;
+use Network\Filters\FilterGroup as FilterGroup;
+use Network\Commanding\CommandBus as CommandBus;
+use Network\Querying\QueryBus as QueryBus;
+use Network\Support\FileManager as FileManager;
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
@@ -48,12 +56,11 @@ $di->set('view', function () use ($config) {
                 'compiledSeparator' => '_'
             ));*/
             $volt->getCompiler()->addFunction('implode', 'implode');
-            $volt->getCompiler()->addFunction('nl2br', 'nl2br');
+            $volt->getCompiler()->addFunction('array_chunk', 'array_chunk');
             return $volt;
         },
         '.phtml' => 'Phalcon\Mvc\View\Engine\Php'
     ));
-
     return $view;
 }, true);
 
@@ -80,7 +87,7 @@ $di->set('modelsMetadata', function () {
 /**
  * Start the session the first time some component request the session service
  */
-$di->set('session', function () {
+$di->setShared('session', function () {
     $session = new SessionAdapter();
     $session->start();
 
@@ -116,15 +123,69 @@ $di->set('router', function () {
  * Security
  * 
  */
-
-$di->set('security', function(){
+$di->setShared('security', function() {
 
     $security = new Phalcon\Security();
-
     //Set the password hashing factor to 12 rounds
     $security->setWorkFactor(12);
 
     return $security;
-}, true);
+});
 
+$di->setShared('eventsManager', function () {
+    $eventsManager = new EventsManager();
+    $eventsManager->initialize();
+    return $eventsManager;
+});
 
+/**
+ * Dispatcher
+ */
+$di->setShared('dispatcher', function () use ($di){
+    
+    $dispatcher = new Dispatcher();
+    $dispatcher->setEventsManager($di->getShared('eventsManager'));
+   
+    return $dispatcher;
+});
+
+/**
+ * Filters
+ */
+$di->setShared('filters', function () {
+    // $filters = new FilterGroup();
+    
+    return new FilterGroup();
+});
+
+/**
+ * Auth
+ * Singleton
+ */
+$di->setShared('auth', function () {
+    return new Auth();
+});
+
+/**
+ * CommandBus
+ * Signleton
+ */
+$di->setShared('commandBus', function () {
+    return new CommandBus();
+});
+
+/**
+ * QueryBus
+ * Singleton
+ */
+$di->setShared('queryBus', function () {
+    return new QueryBus();
+});
+
+/**
+ * Model manager
+ */
+$di->setShared('modelManager', function() {
+    $manager = new ModelManager();
+    return $manager;
+});

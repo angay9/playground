@@ -27,13 +27,20 @@ try {
      * Handle the request
      */
     $application = new \Phalcon\Mvc\Application($di);
+    
+    /**
+     * Disable auto view rendering
+     */
+    // $application->useImplicitView(false);
 
     echo $application->handle()->getContent();
     
 
 } catch (\Exception $e) {
-
+    
     echo $e->getMessage();
+    
+    
 }
 /**
  * For codeception Phalcon1 module

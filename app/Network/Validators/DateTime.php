@@ -38,12 +38,12 @@ class DateTime extends PhalconValidator implements ValidatorInterface {
 		
 		$dateTime = \DateTime::createFromFormat($format, $date);
 		
+		
+		$errors = \DateTime::getLastErrors();
 		/** Prevents unexpected behaviour
 		* @see http://stackoverflow.com/questions/10120643/php-datetime-createfromformat-functionality/10120725#10120725
 		*
 		*/
-		$errors = \DateTime::getLastErrors();
-		
 		if (!$dateTime || !empty($errors['warning_count'])) {
 			// Failed
 			

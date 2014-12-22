@@ -9,15 +9,27 @@ use Phalcon\Validation\Validator\Email;
 use Phalcon\Validation\Validator\Confirmation;
 use Network\Validators\DateTime;
 use Network\Validators\Uniqueness;
-use Network\Forms\Form as Form;
+
 
 class RegistrationForm extends Form {
 	
-	public function initialize ()
-	{
-		$action = $this->router->getRouteByName('register_route');		
-		$this->setAction($action);
+	protected $_rules = [
+		'name' => 'required',
+		'username' => 'required',
+		'email' => 'required|email|unique:users,email',
+		'password' => 'required|confirmed:passwordConfirmation',
+	];
 
+	public function __construct ($entityName = null, $entityId = null)
+	{
+		parent::__construct($entityName, $entityId);
+		parent::initialize();
+	}
+
+	
+	public function initialize ()
+	{				
+		
 		$name = new Text('name');
 		$this->add($name);
 
@@ -32,5 +44,6 @@ class RegistrationForm extends Form {
 
 		$passwordConfirmation = new Password('passwordConfirmation');
 		$this->add($passwordConfirmation);
+
 	}
 }

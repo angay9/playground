@@ -1,0 +1,18 @@
+.media {
+	border: 1px solid #e3e3e3;
+	padding: 15px 10px;
+	.media-heading {
+		overflow: hidden;
+	
+		.media-actions {
+			.action-icon {
+				color: #000;
+				opacity: 0.8;
+				margin-left: 10px;
+			}
+			.action-icon:hover {
+				opacity: 1;
+			}
+		}
+	}
+}

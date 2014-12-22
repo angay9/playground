@@ -22,6 +22,7 @@ class CreateUsersTable extends AbstractMigration
      */
     public function up()
     {
+
         $this->table('users')
             ->addColumn('name', 'string')
             ->addColumn('username', 'string')

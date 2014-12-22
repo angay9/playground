@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50616
 File Encoding         : 65001
 
-Date: 2014-11-28 21:35:08
+Date: 2014-12-06 11:30:45
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -28,5 +28,9 @@ CREATE TABLE `users` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8;
 
+-- ----------------------------
+-- Records of users
+-- ----------------------------
+INSERT INTO `users` VALUES ('61', 'Andriy Haydash', 'angay9', '$2a$12$qWvwgbQhQfcMMDQSPe8vle.qbfdCtkTkn2tZIxQC/kAvlcXqPlQPG', 'angay9@gmail.com', '2014-12-06 00:00:00', '2014-12-06 00:00:00');

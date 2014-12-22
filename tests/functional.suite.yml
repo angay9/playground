@@ -6,7 +6,7 @@
 
 class_name: FunctionalTester
 modules:
-    enabled: [Filesystem, FunctionalHelper, Db, Phalcon1]
+    enabled: [Filesystem, FunctionalHelper, Db, Phalcon1, Asserts]
     config:
         Phalcon1:
             bootstrap: 'public/index.php'

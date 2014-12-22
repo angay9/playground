@@ -16,45 +16,52 @@ use Phalcon\Validation\Validator\Regex;
 use Phalcon\Validation\Validator\StringLength;
 use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Confirmation;
+use Phalcon\Forms\Element\Hidden;
 use Network\Validators\DateTime;
 use Network\Validators\Uniqueness;
+use Network\Validators\File;
+use Network\Validators\Maxsize;
+
 /**
  * Base form class that all forms should extend
  * 
  */
-
 abstract class Form extends PhalconForm
 {
+	/**
+	 * Hidden csrf token field
+	 * @var Phalcon\Forms\Element\Hidden
+	 */
+	protected static $_csrf;
+
 	/**
 	 * Validation rules
 	 * @var array
 	 */
 	protected $_rules = [];
 
-	public function initialize() 
+	public function __construct ($entityName = null, $entityId = null)
 	{
-		$name = new Text('name');
-		$username = new Text('username');
-		$email = new Text('email');
-		$password = new Password('password');
-		$passwordConfirmation = new Password('passwordConfirmation');
-		$this->add($name);
-		$this->add($username);
-		$this->add($email);
-		$this->add($password);
-		$this->add($passwordConfirmation);
+		$this->add(new Hidden('id'));
+		$this->bindEntity($entityName, $entityId);
+		parent::__construct($this->getEntity());
+	}
+
+	public function initialize ()
+	{
+		$this->addCsrf();	
 	}
 
 	/**
 	 * Set up some validation rules
 	 * @param array $rules validation rules
 	 */
-	public function setValidationRules (array $rules = null)
-	{
-		foreach ($rules as $field => $rules) 
+	private function _setValidationRules ()
+	{	
+		foreach ($this->_rules as $field => $rule) 
 		{
-			$this->_rules[$field] = explode('|', $rules);
-			
+			$this->_rules[$field] = explode('|', $rule);
+				
 		}
 
 		foreach ($this->_rules as $field => $rules) 
@@ -66,7 +73,9 @@ abstract class Form extends PhalconForm
 				} else {
 					$rulename = substr($rule, 0);
 				}
+				
 				$formField = $this->get($field);
+				
 				switch ($rulename) {
 
 					case 'required':
@@ -127,7 +136,6 @@ abstract class Form extends PhalconForm
 						break;
 
 					case 'confirmed':
-
 						$formField->addValidator(new Confirmation (array (
 							'message' => 'Password doesn\'t match confirmation.',
 							'with' => $this->getRuleArgs($rule) [0]
@@ -143,7 +151,7 @@ abstract class Form extends PhalconForm
 						break;
 
 					case 'unique':
-						
+
 						$formField->addValidator(new Uniqueness (array (
 							'message' => "The field {$field} is already taken.",
 							'table' => $this->getRuleArgs($rule)[0],
@@ -151,12 +159,29 @@ abstract class Form extends PhalconForm
 						)));
 						break;
 
+					case 'file':
+						$formField->addValidator(new File (array (
+							'message' => "The file is of a required type.",
+							'mimes' => $this->getRuleArgs($rule)
+						)));
+						break;
+
+					case 'maxsize':
+						$args = $this->getRuleArgs($rule)[0];
+						$formField->addValidator(new Maxsize (array (
+							'message' => 'The file is too big and cannot exceed a size of ' . $args . ' bytes .',
+							'maxsize' => $args
+						)));
+						break;
+
 					default:
 						throw new \Exception("No validator exists for the specified rule {$rule}.");
 						break;
 				}
+
 			}
-		}	
+
+		}
 	}
 
 	/**
@@ -183,10 +208,9 @@ abstract class Form extends PhalconForm
 	 */
 	public function messages ($fieldName)
 	{	
-		
 		if ($this->flash->has($fieldName)) {
-			$messages = implode("\r\n", $this->flash->getMessages($fieldName));
-			echo nl2br($messages);
+			$messages = implode("<br>", $this->flash->getMessages($fieldName));
+			echo $messages;
 		}
 	}
 
@@ -198,14 +222,46 @@ abstract class Form extends PhalconForm
 	 */
 	public function isValid ($data = null, $entity = null)
 	{
-
+		$this->_setValidationRules();
+		
 		if (!parent::isValid($data)) {
 			foreach ($this->getMessages() as $msg) {
 				$this->flash->message($msg->getField(), $msg->getMessage());
 			}
 			return false;
 		}
+
 		return true;
+	}
+	/**
+	 * Adds csrf hidden field to form
+	 */
+	public function addCsrf ()
+	{
+		if (is_null(static::$_csrf)) {
+			static::$_csrf = new Hidden('csrf', [
+				'name' => $this->security->getTokenKey(),
+				'value' => $this->security->getToken()
+			]);
+		}
+		
+		$this->add(static::$_csrf);
+	}
+
+	public function bindEntity ($entityName = null, $entityId = null)
+	{
+		if (($entityName && $entityId) || !is_null($this->getEntity())) {
+			if (class_exists($entityName)) {
+				$entity = $entityName::findFirst((int) $entityId);
+				if ($entity) {
+					$this->setEntity($entity);
+					$this->get('id')->setAttribute('id', $entity->getId());
+				}	
+			}
+			
+		}
+
+		return $this;
 	}
 
 }

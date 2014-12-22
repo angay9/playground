@@ -1,0 +1,21 @@
+/* bootstrap glyphicons */
+@import url("//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css");
+
+.navbar {
+	border-width: thin;
+	position: relative;
+	z-index: 1000;
+}
+
+textarea {
+	resize: none;
+	min-height: 100px;
+}
+.pagination {
+	li.active > *,
+	li.active > *:hover {
+		background: #1862b5;
+		border-color: #1967be;
+		color: #fff;
+	}
+}

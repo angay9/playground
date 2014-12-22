@@ -2,9 +2,14 @@
 
 namespace Network\Users;
 
+use Network\Presenters\PresentableTrait;
+
 class User extends \Phalcon\Mvc\Model
 {
+    use PresentableTrait;
 
+    protected $_presenter = 'Network\Presenters\UserPresenter';
+    
     /**
      *
      * @var integer
@@ -119,7 +124,7 @@ class User extends \Phalcon\Mvc\Model
      */
     public function setCreatedAt($createdAt)
     {
-        $this->createdAt = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -132,7 +137,7 @@ class User extends \Phalcon\Mvc\Model
      */
     public function setUpdatedAt($updatedAt)
     {
-        $this->updatedAt = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
@@ -213,7 +218,13 @@ class User extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSource('users');
+        $this->hasMany('id', '\Network\Statuses\Status', 'userId', [
+            'alias' => 'statuses'
+        ]);
 
+        $this->hasOne('id', '\Network\Profiles\Profile', 'userId', [
+            'alias' => 'profile'
+        ]);
     }
 
     /**
@@ -232,20 +243,26 @@ class User extends \Phalcon\Mvc\Model
         );
     }
 
-
+    public function beforeValidationOnCreate ()
+    {
+        $this->createdAt = date('Y-m-d H:i:s');
+        $this->updatedAt = date('Y-m-d H:i:s');
+    }
+    
     public function beforeSave ()
     {        
-        $this->password = $this->getDI()->getSecurity()->hash($this->password);        
+                              
     }
-
+    
     public function beforeCreate ()
     {
-        $this->createdAt = date('Y-m-d');
-        $this->updatedAt = date('Y-m-d');
+        $this->password = $this->getDI()->getSecurity()->hash($this->password);
+
     }
 
     public function beforeUpdate ()
     {
-        $this->updatedAt = date('Y-m-d');
+        $this->updatedAt = date('Y-m-d H:i:s');
     }
+
 }
